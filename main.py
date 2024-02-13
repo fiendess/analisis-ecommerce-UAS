@@ -103,8 +103,16 @@ with tab1:
     kategori_terbanyak = merged_data['product_category_name'].value_counts().idxmax()
     st.write(f"Kategori Produk yang Paling Banyak Dibeli: {kategori_terbanyak}")
 
-
-
+    st.write('<hr>', unsafe_allow_html=True)
+    
+    # Analisis Perubahan Persentase Pendapatan dari Tahun Sebelumnya
+    st.subheader("Perubahan Persentase Pendapatan dari Tahun Sebelumnya")
+    revenue_change = total_revenue_per_year.pct_change() * 100
+    fig_revenue_change = px.bar(x=revenue_change.index, y=revenue_change.values, 
+                                title='Perubahan Persentase Pendapatan dari Tahun Sebelumnya')
+    fig_revenue_change.update_layout(xaxis_title='Tahun', yaxis_title='Perubahan Persentase Pendapatan (%)')
+    st.plotly_chart(fig_revenue_change)
+    
 
 with tab2:
     st.header("Penjualan")
@@ -116,6 +124,19 @@ with tab2:
 
     # Menampilkan plot menggunakan st.plotly_chart()
     st.plotly_chart(fig)
+    
+    st.write('<hr>', unsafe_allow_html=True)
+    
+    # Visualisasi sederhana tren penjualan dari waktu ke waktu
+    st.subheader("Analisis Tren Penjualan")
+    fig_trend = px.line(total_revenue_per_year, title='Tren Total Pendapatan dari Waktu ke Waktu')
+    fig_trend.update_layout(xaxis_title='Tahun', yaxis_title='Total Pendapatan')
+    
+    # Menambahkan label langsung di atas titik data pada sumbu y
+    for year, revenue in total_revenue_per_year.items():
+        fig_trend.add_annotation(x=year, y=revenue, text=f'{revenue}', showarrow=True, arrowhead=1)
+    
+    st.plotly_chart(fig_trend)
 
 with tab3:
     st.header("Segmentasi Pelanggan")
@@ -136,6 +157,16 @@ with tab3:
 
     # Menampilkan pie chart
     st.plotly_chart(fig)
+    
+    st.write('<hr>', unsafe_allow_html=True)
+    
+    # Analisis Rata-rata Pendapatan per Pelanggan
+    st.subheader("Rata-rata Pendapatan per Pelanggan")
+    avg_revenue_per_customer = total_revenue_per_year / unique_customers_per_year
+    fig_avg_revenue_per_customer = px.bar(x=avg_revenue_per_customer.index, y=avg_revenue_per_customer.values, 
+                                           title='Rata-rata Pendapatan per Pelanggan dari Waktu ke Waktu')
+    fig_avg_revenue_per_customer.update_layout(xaxis_title='Tahun', yaxis_title='Rata-rata Pendapatan per Pelanggan')
+    st.plotly_chart(fig_avg_revenue_per_customer)
 
 
 with st.sidebar:
