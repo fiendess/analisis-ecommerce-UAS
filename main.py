@@ -202,6 +202,15 @@ with tab1:
     # Tampilkan histogram
     st.plotly_chart(fig)
 
+    st.write('<hr>', unsafe_allow_html=True)
+    
+    # Analisis Perubahan Persentase Pendapatan dari Tahun Sebelumnya
+    st.subheader("Perubahan Persentase Pendapatan dari Tahun Sebelumnya")
+    revenue_change = total_revenue_per_year.pct_change() * 100
+    fig_revenue_change = px.bar(x=revenue_change.index, y=revenue_change.values, 
+                                title='Perubahan Persentase Pendapatan dari Tahun Sebelumnya')
+    fig_revenue_change.update_layout(xaxis_title='Tahun', yaxis_title='Perubahan Persentase Pendapatan (%)')
+    st.plotly_chart(fig_revenue_change)
 
 
 
@@ -245,6 +254,16 @@ with tab3:
 
     # Menampilkan pie chart
     st.plotly_chart(fig)
+    
+    st.write('<hr>', unsafe_allow_html=True)
+    
+    # Analisis Rata-rata Pendapatan per Pelanggan
+    st.subheader("Rata-rata Pendapatan per Pelanggan")
+    avg_revenue_per_customer = total_revenue_per_year / unique_customers_per_year
+    fig_avg_revenue_per_customer = px.bar(x=avg_revenue_per_customer.index, y=avg_revenue_per_customer.values, 
+                                           title='Rata-rata Pendapatan per Pelanggan dari Waktu ke Waktu')
+    fig_avg_revenue_per_customer.update_layout(xaxis_title='Tahun', yaxis_title='Rata-rata Pendapatan per Pelanggan')
+    st.plotly_chart(fig_avg_revenue_per_customer)
 
     
      # Tampilkan hasil
