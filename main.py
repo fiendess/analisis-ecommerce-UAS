@@ -57,6 +57,19 @@ filtered_data = merged_data[(merged_data['product_category_name'] == 'informatic
                              (merged_data['order_purchase_timestamp'].dt.year == 2017) |
                              (merged_data['order_purchase_timestamp'].dt.year == 2018))]
 
+ # Filter data berdasarkan kota yang dipilih oleh user pada sidebar
+selected_city = st.sidebar.selectbox(
+label='Pilih Kota',
+options=merged_data['customer_city'].unique(),
+key='select_city'
+)
+
+ # Filter data berdasarkan kategori informatica_acessorios dan kota yang dipilih
+filtered_data_city = merged_data[(merged_data['product_category_name'] == 'informatica_acessorios') & 
+                                                            (merged_data['customer_city'] == selected_city) &
+                                                            ((merged_data['order_purchase_timestamp'].dt.year == 2016) |
+                                                            (merged_data['order_purchase_timestamp'].dt.year == 2017) |
+                                                            (merged_data['order_purchase_timestamp'].dt.year == 2018))]
 
 # Hitung jumlah pelanggan yang membeli produk dengan kategori Computer Accessories
 jumlah_pelanggan_CA = filtered_data['customer_id'].nunique()
@@ -72,8 +85,14 @@ RJ_data = merged_data[merged_data['customer_city'] == 'rio de janeiro']
 # Hitung jumlah total pelanggan dari kota Rio de Janeiro yang belanja seluruh kategori
 total_pelanggan_RJ = RJ_data['customer_id'].nunique()
 
-# Hitung proporsi jumlah pelanggan terhadap pembelian produk
-proporsi = jumlah_pelanggan_CA / total_pelanggan_RJ * 100
+
+# Hitung jumlah pelanggan yang membeli produk dengan kategori informatica_acessorios dan kota yang dipilih
+jumlah_pelanggan_city = filtered_data_city['customer_id'].nunique()
+
+# Hitung proporsi jumlah pelanggan terhadap total pelanggan dari kota yang dipilih
+proporsi_city = jumlah_pelanggan_city / total_pelanggan_RJ * 100
+
+
 
 ############################################################################################
 df_order = pd.DataFrame(data_order)
@@ -112,7 +131,26 @@ with tab1:
     year = st.sidebar.selectbox(
         label='Pilih Tahun',
         options=total_revenue_per_year.index
+        
     )
+
+    # Plot total pendapatan per tahun
+    fig_revenue = go.Figure(data=go.Bar(x=total_revenue_per_year.index, y=total_revenue_per_year.values))
+    fig_revenue.update_layout(title='Total Pendapatan per Tahun', xaxis_title='Tahun', yaxis_title='Total Pendapatan')
+
+    # Plot jumlah pelanggan unik per tahun
+    fig_customers = go.Figure(data=go.Bar(x=unique_customers_per_year.index, y=unique_customers_per_year.values))
+    fig_customers.update_layout(title='Jumlah Pelanggan Unik per Tahun', xaxis_title='Tahun', yaxis_title='Jumlah Pelanggan')
+
+    # Plot jumlah produk terjual per tahun
+    fig_products = go.Figure(data=go.Bar(x=total_products_sold_per_year.index, y=total_products_sold_per_year.values))
+    fig_products.update_layout(title='Jumlah Produk Terjual per Tahun', xaxis_title='Tahun', yaxis_title='Jumlah Produk Terjual')
+
+    # Tampilkan grafik menggunakan Streamlit
+    st.plotly_chart(fig_revenue)
+    st.plotly_chart(fig_customers)
+    st.plotly_chart(fig_products)
+
     st.write(f"Total Pendapatan Tahun {year}: {total_revenue_per_year[year]}")
     st.write(f"Jumlah Pelanggan Tahun {year}: {unique_customers_per_year[year]}")
     st.write(f"Jumlah Produk Terjual Tahun {year}: {total_products_sold_per_year[year]}")
@@ -196,8 +234,8 @@ with tab3:
     st.header("Segmentasi Pelanggan")
     st.write("Visualisasi terkait segmentasi pelanggan berdasarkan atribut seperti frekuensi pembelian, nilai transaksi, atau geografi.")
 
-    labels = ['Pelanggan yang membeli produk Comp~uter Accessories', 'Pelanggan yg membeli kategori Lainnya']
-    sizes = [proporsi, 100 - proporsi]  
+    labels = ['Pelanggan yang membeli produk Computer Accessories', 'Pelanggan yg membeli kategori Lainnya']
+    sizes = [proporsi_city, 100 - proporsi_city]  
     colors = ['lightcoral', 'lightblue']
 
     # Membuat objek figure
@@ -207,7 +245,7 @@ with tab3:
                                 marker=dict(colors=colors))])
 
     # Layout
-    fig.update_layout(title='Proporsi Pelanggan Computer Accessories dari Total Pelanggan di Kota Rio de Janeiro')
+    fig.update_layout(title='Proporsi Pelanggan Computer Accessories dari Total Pelanggan di Kota {}'.format(selected_city), title_x=0.5, title_y=0.9, title_xanchor='center', title_font=dict(size=20))
 
     # Menampilkan pie chart
     st.plotly_chart(fig)
@@ -221,6 +259,13 @@ with tab3:
                                            title='Rata-rata Pendapatan per Pelanggan dari Waktu ke Waktu')
     fig_avg_revenue_per_customer.update_layout(xaxis_title='Tahun', yaxis_title='Rata-rata Pendapatan per Pelanggan')
     st.plotly_chart(fig_avg_revenue_per_customer)
+
+    
+     # Tampilkan hasil
+    st.write(f"Jumlah Pelanggan yang Membeli Produk informatica_acessorios di Kota {selected_city}: {jumlah_pelanggan_city}")
+    st.write(f"Proporsi Jumlah Pelanggan terhadap Total Pelanggan dari Kota {selected_city}: {proporsi_city}%")              
+
+
 
 with tab2:
 
