@@ -282,4 +282,4 @@ with tab2:
     for year, revenue in total_revenue_per_year.items():
         fig_trend.add_annotation(x=year, y=revenue, text=f'{revenue}', showarrow=True, arrowhead=1)
     
-    st.plotly_chart(fig_trend)
+    st.plotly_chart(fig_trend) 
