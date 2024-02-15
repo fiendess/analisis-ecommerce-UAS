@@ -57,6 +57,13 @@ filtered_data = merged_data[(merged_data['product_category_name'] == 'informatic
                              (merged_data['order_purchase_timestamp'].dt.year == 2017) |
                              (merged_data['order_purchase_timestamp'].dt.year == 2018))]
 
+ # Filter data berdasarkan kota yang dipilih oleh user pada sidebar
+selected_city = st.sidebar.selectbox(
+label='Pilih Kota',
+options=merged_data['customer_city'].unique(),
+key='select_city'
+)
+
 
 # Hitung jumlah pelanggan yang membeli produk dengan kategori Computer Accessories
 jumlah_pelanggan_CA = filtered_data['customer_id'].nunique()
