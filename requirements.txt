@@ -4,5 +4,5 @@ numpy
 seaborn
 matplotlib
 plotly
-from sklearn.cluster import KMeans
-from streamlit_option_menu import option_menu
+scikit-learn
+streamlit_option_menu
