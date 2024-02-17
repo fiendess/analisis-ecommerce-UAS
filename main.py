@@ -122,7 +122,7 @@ jumlah_cancelled_orders_2018 = len(cancelled_orders_2018)
 #Tabs
 tab1, tab2, tab3 = st.tabs(["Overview", "Penjualan", "Pelanggan"])
 
-
+#Overview
 with tab1:
     st.header("Dashboard Overview")
     st.write("Ringkasan tentang kinerja E-Commerce secara keseluruhan.")
@@ -137,6 +137,17 @@ with tab1:
     fig_revenue = go.Figure(data=go.Bar(x=total_revenue_per_year.index, y=total_revenue_per_year.values))
     fig_revenue.update_layout(title='Total Pendapatan per Tahun', xaxis_title='Tahun', yaxis_title='Total Pendapatan')
 
+    # Menampilkan grafik
+    st.plotly_chart(fig_revenue)
+
+    # Menambahkan subheader
+    st.subheader("Informasi Analisis")
+    st.write(f"Total Pendapatan Tahun {year}: {total_revenue_per_year[year]}")
+    # Membuat ekspander untuk penjelasan analisis
+    with st.expander("Penjelasan Analisis Informasi"):
+        st.write("Dari informasi visualisasi di atas, dapat dilihat bahwa total pendapatan meningkat dari tahun ke tahun. Ini menunjukkan bahwa bisnis berkembang dan menghasilkan lebih banyak pendapatan dari waktu ke waktu. Ini dapat digunakan untuk mempertimbangkan strategi untuk mempertahankan pertumbuhan ini, atau bahkan meningkatkannya lebih lanjut.")
+
+
     # Plot jumlah pelanggan unik per tahun
     fig_customers = go.Figure(data=go.Bar(x=unique_customers_per_year.index, y=unique_customers_per_year.values))
     fig_customers.update_layout(title='Jumlah Pelanggan Unik per Tahun', xaxis_title='Tahun', yaxis_title='Jumlah Pelanggan')
@@ -144,40 +155,19 @@ with tab1:
     # Plot jumlah produk terjual per tahun
     fig_products = go.Figure(data=go.Bar(x=total_products_sold_per_year.index, y=total_products_sold_per_year.values))
     fig_products.update_layout(title='Jumlah Produk Terjual per Tahun', xaxis_title='Tahun', yaxis_title='Jumlah Produk Terjual')
-
-    # Tampilkan grafik menggunakan Streamlit
-    st.plotly_chart(fig_revenue)
+ 
     st.plotly_chart(fig_customers)
+    st.write(f"Jumlah Pelanggan Tahun {year}: {unique_customers_per_year[year]}")
+    with st.expander("Penjelasan Analisis Infomasi"):
+        
+        st.write("Dari informasi visualisasi di atas, dapat dilihat bahwa jumlah pelanggan unik juga meningkat dari tahun ke tahun. Ini menunjukkan bahwa bisnis menarik lebih banyak pelanggan dari waktu ke waktu. ")
     st.plotly_chart(fig_products)
 
-    st.write(f"Total Pendapatan Tahun {year}: {total_revenue_per_year[year]}")
-    st.write(f"Jumlah Pelanggan Tahun {year}: {unique_customers_per_year[year]}")
+   
+  
     st.write(f"Jumlah Produk Terjual Tahun {year}: {total_products_sold_per_year[year]}")
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=total_revenue_per_year.index, y=total_revenue_per_year.values, name='Total Pendapatan'))
-    fig.add_trace(go.Bar(x=unique_customers_per_year.index, y=unique_customers_per_year.values, name='Jumlah Pelanggan'))
-    fig.add_trace(go.Bar(x=total_products_sold_per_year.index, y=total_products_sold_per_year.values, name='Jumlah Produk Terjual'))
-    # Layout grafik
-    fig.update_layout(barmode='group', title='Ringkasan Kinerja Bisnis', xaxis_title='Tahun', yaxis_title='Jumlah')
-
-    # Tampilkan grafik 
-    st.plotly_chart(fig)
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        for year in total_revenue_per_year.index:
-            st.write(f"Total Pendapatan Tahun {year}: {total_revenue_per_year[year]}")
-
-    with col2:
-        for year in total_revenue_per_year.index:
-            st.write(f"Jumlah Pelanggan Tahun {year}: {unique_customers_per_year[year]}")
-
-    with col3:
-        for year in total_revenue_per_year.index:
-            st.write(f"Jumlah Produk Terjual Tahun {year}: {total_products_sold_per_year[year]}")
-
+    with st.expander("Penjelasan Analisis Infomasi"):
+        st.write("Dari informasi visualisasi di atas, dapat dilihat bahwa jumlah produk yang terjual juga meningkat dari tahun ke tahun. Ini menunjukkan bahwa bisnis berhasil menjual lebih banyak produk dari waktu ke waktu. Ini dapat digunakan untuk mempertimbangkan strategi untuk mempertahankan pertumbuhan ini, atau bahkan meningkatkannya lebih lanjut.")
 
 
     # kategori pada produk yang paling banyak dibeli
@@ -199,21 +189,37 @@ with tab1:
                     xaxis_title='Status Order',
                     yaxis_title='Jumlah Order')
 
-    # Tampilkan histogram
+   # Gabungkan dataset
+    merged_data = pd.merge(pd.merge(data_order, data_order_item, on='order_id'), data_customer, on='customer_id')
+
+    # Ekstraksi fitur yang relevan
+    features = merged_data[['price', 'order_item_id']]
+
+    # Hitung total pembayaran
+    merged_data['total_payment'] = merged_data['price'] * merged_data['order_item_id']
+
+
+    # Inisialisasi model klastering
+    kmeans = KMeans(n_clusters=3, random_state=42)
+
+    # Latih model
+    kmeans.fit(features)
+
+    # Prediksi klaster untuk setiap pelanggan
+    merged_data['cluster'] = kmeans.predict(features)
+
+    # Visualisasi hasil klastering menggunakan Plotly
+    fig = px.scatter(merged_data, x='total_payment', y='order_item_id', color='cluster',
+                    title='Klastering Pelanggan Berdasarkan Perilaku Pembelian')
+
     st.plotly_chart(fig)
 
-    st.write('<hr>', unsafe_allow_html=True)
-    
-    # Analisis Perubahan Persentase Pendapatan dari Tahun Sebelumnya
-    st.subheader("Perubahan Persentase Pendapatan dari Tahun Sebelumnya")
-    revenue_change = total_revenue_per_year.pct_change() * 100
-    fig_revenue_change = px.bar(x=revenue_change.index, y=revenue_change.values, 
-                                title='Perubahan Persentase Pendapatan dari Tahun Sebelumnya')
-    fig_revenue_change.update_layout(xaxis_title='Tahun', yaxis_title='Perubahan Persentase Pendapatan (%)')
-    st.plotly_chart(fig_revenue_change)
+    # Menampilkan hasil klastering
+    with st.expander("Hasil Klastering Pelanggan"):
+        st.write("Hasil klastering menunjukkan bahwa pelanggan dapat dikelompokkan menjadi 3 kelompok berdasarkan perilaku pembelian mereka. Kelompok 0 menunjukkan pelanggan dengan pembelian yang sedikit dan total pembayaran yang rendah, kelompok 1 menunjukkan pelanggan dengan pembelian yang sedang dan total pembayaran yang sedang, dan kelompok 2 menunjukkan pelanggan dengan pembelian yang banyak dan total pembayaran yang tinggi.")
 
 
-
+#Penjualan
 with tab2:
     st.header("Penjualan")
 
@@ -236,6 +242,75 @@ with tab2:
     # Menampilkan plot menggunakan st.plotly_chart()
     st.plotly_chart(fig)
 
+    def analisis_paska(data_customer,data_sellers):
+
+        # Mencari jumlah customer di berbagai kota
+        customer_city = data_customer['customer_city'].value_counts()
+
+        # Mengurutkan dan mencari 5 kota teratas dengan customer terbanyak
+        customer_city_head = customer_city.head(5)
+
+        # mencari 5 kota dengan jumlah seller paling sedikit
+        customer_city_tail = customer_city.tail(5)
+
+        # Mencari jumlah seller di berbagai kota
+        seller_city = data_sellers['seller_city'].value_counts()
+
+        # Mancari Jumlah Seller paling banyak
+        seller_city_head = seller_city.head(5)
+
+        # Mencari 5 kota dengan penjual paling sedikit
+        seller_city_tail = seller_city.tail(5)
+
+        st.caption("**10122480 - Paska Damarkus Sinaga**")
+        st.subheader("Informasi Analisis")
+        st.markdown("**Analisis Terhadap 10 Kota Dengan Seller & Customer Paling Banyak**")
+        with st.expander("Tujuan Analisis Infomasi Tersebut"):
+            st.write("Dengan mengetahui kota mana yang memiliki jumlah pelanggan dan penjual terbanyak, Anda dapat mengalokasikan sumber daya dan upaya pemasaran Anda dengan lebih efisien. Misalnya, jika suatu kota memiliki jumlah penjual yang tinggi tetapi pelanggan yang rendah, Anda mungkin ingin meningkatkan upaya pemasaran Anda di kota tersebut.")
+            st.write("Analisis ini dapat membantu Anda memahami dinamika pasar Anda dengan lebih baik. Anda dapat mengetahui di mana penjual dan pelanggan Anda berada, dan bagaimana mereka berinteraksi satu sama lain.")
+
+        st.markdown("---")
+        st.subheader("Grafik 10 Kota Dengan Seller Paling Banyak")
+
+        # Warna untuk diagram kotak
+        colors = plt.cm.Paired(np.arange(len(seller_city_head)))
+
+        # Plot seller
+        plt.bar(seller_city_head.index, seller_city_head.values, color=colors)
+        plt.xticks(seller_city_head.index, rotation=90)
+        plt.title('10 Kota dengan Penjual Terbanyak')
+
+        
+
+        st.markdown("---")
+        st.subheader("Diagram Lingkaran Jumlah Seller di Kota-Kota Teratas")
+
+        # Ambil data untuk diagram lingkaran
+        top_seller_cities = seller_city_head.index
+        top_seller_counts = seller_city_head.values
+
+        # Buat diagram lingkaran
+        plt.figure(figsize=(8, 8))
+        plt.pie(top_seller_counts, labels=top_seller_cities, autopct='%1.1f%%', startangle=140, colors=colors)
+        plt.title('Persentase Jumlah Seller di Kota-Kota Teratas')
+        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+        # Tampilkan diagram lingkaran
+        st.pyplot(plt)
+
+        st.markdown("---")
+        st.subheader("Analisis Tambahan")
+
+        st.write("Dari analisis yang dilakukan, kita dapat melihat bahwa Sao Paulo menjadi kota dengan jumlah penjual dan pelanggan terbanyak. Hal ini menunjukkan bahwa Sao Paulo memiliki potensi pasar yang besar dan aktif dalam industri e-commerce. Strategi pemasaran yang difokuskan di kota ini dapat memberikan hasil yang signifikan.")
+        st.write("Selain itu, terdapat korelasi positif antara jumlah penjual dan pelanggan di tiap kota, yang menunjukkan bahwa semakin banyak penjual, kemungkinan besar akan ada juga lebih banyak pelanggan. Oleh karena itu, mengembangkan jaringan penjual dapat menjadi strategi yang efektif untuk meningkatkan pangsa pasar.")
+        st.write("Untuk mengoptimalkan strategi pemasaran, perlu dilakukan analisis lebih lanjut mengenai preferensi pelanggan dan kebutuhan pasar di tiap kota. Dengan pemahaman yang lebih mendalam tentang karakteristik pasar lokal, Anda dapat mengarahkan upaya pemasaran Anda dengan lebih tepat dan efisien.")
+
+    analisis_paska(data_customer,data_sellers)
+
+
+    
+
+#Pelanggan
 with tab3:
     st.header("Pelanggan")
     st.caption("**10122286 - Didan Rahmana**")
@@ -383,6 +458,58 @@ with tab3:
 
     analisis_farras(data_customer,data_sellers)
 
+    def analisisRyan(data_customer,data_produk,data_order,data_order_item):
+
+        # Mencari jumlah product
+        product_category_name = data_produk['product_category_name'].value_counts()
+
+        # Mengurutkan dan mencari 10 kategori produk yang paling banyak dipesan
+        product_category_name_head = product_category_name.head(10)
+
+        # Mencari jumlah customer di berbagai kota
+        customer_city = data_customer['customer_city'].value_counts()
+
+        # Mengurutkan dan mencari 5 kota teratas dengan customer terbanyak
+        customer_city_head = customer_city.head(5)
+
+        # mencari 5 kota dengan jumlah seller paling sedikit
+        customer_city_tail = customer_city.tail(5)
+
+        # Mencari jumlah seller di berbagai kota
+        seller_city = data_sellers['seller_city'].value_counts()
+
+        # Mancari Jumlah Seller paling banyak
+        seller_city_head = seller_city.head(5)
+
+        # Mencari 5 kota dengan penjual paling sedikit
+        seller_city_tail = seller_city.tail(5)
+
+        #==========================================================================
+
+        st.caption("**10122479 - Ryan Akbar Ramadhan**")
+        st.markdown("**Analisis Terhadap 10 Kategori Produk Yang Paling Banyak dipesan**")
+        with st.expander("Tujuan Analisis Infomasi Tersebut"):
+            st.write("Dengan mengetahui kategori produk yang paling banyak dipesan, Anda dapat mengalokasikan sumber daya anda agar lebih efisien untuk kategori produk yang paling banyak.")
+            st.write("Analisis ini dapat membantu Anda memahami dinamika pasar Anda dengan lebih baik.")
+
+        #===========================================================================
+        st.markdown("---")
+        st.subheader("Grafik 10 Kategori Produk Dengan Order Paling Banyak")
+
+        warna = ['green','lightgreen','lightgreen','lightgreen','yellow']
+
+        # Plot seller
+        plt.bar(product_category_name_head.index, product_category_name_head.values, color=warna)
+        plt.xticks(product_category_name_head.index, rotation=90)
+        plt.title('10 Kategori Produk Yang Paling Banyak')
+
+        # Menampilkan Visualisasi
+        st.pyplot(plt)
+
+    analisisRyan(data_customer,data_produk,data_order,data_order_item)
+
+    
+
 
 with tab2:
     
@@ -432,32 +559,7 @@ with tab2:
     st.write(f"Pesanan yang di batalkan pada tahun 2016: {jumlah_cancelled_orders_2016}")
     st.write(f"Pesanan yang di batalkan pada tahun 2017: {jumlah_cancelled_orders_2017}")
     st.write(f"Pesanan yang di batalkan pada tahun 2018: {jumlah_cancelled_orders_2018}")
- 
 
-
-# Gabungkan dataset
-merged_data = pd.merge(pd.merge(data_order, data_order_item, on='order_id'), data_customer, on='customer_id')
-
-# Ekstraksi fitur yang relevan
-features = merged_data[['price', 'order_item_id']]
-
-# Hitung total pembayaran
-merged_data['total_payment'] = merged_data['price'] * merged_data['order_item_id']
-
-
-# Inisialisasi model klastering
-kmeans = KMeans(n_clusters=3, random_state=42)
-
-# Latih model
-kmeans.fit(features)
-
-# Prediksi klaster untuk setiap pelanggan
-merged_data['cluster'] = kmeans.predict(features)
-
-# Visualisasi hasil klastering menggunakan Plotly
-fig = px.scatter(merged_data, x='total_payment', y='order_item_id', color='cluster',
-                 title='Klastering Pelanggan Berdasarkan Perilaku Pembelian')
-st.plotly_chart(fig)
 
 
 
