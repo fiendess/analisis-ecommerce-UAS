@@ -242,70 +242,47 @@ with tab2:
     # Menampilkan plot menggunakan st.plotly_chart()
     st.plotly_chart(fig)
 
-    def analisis_paska(data_customer,data_sellers):
-
-        # Mencari jumlah customer di berbagai kota
-        customer_city = data_customer['customer_city'].value_counts()
-
-        # Mengurutkan dan mencari 5 kota teratas dengan customer terbanyak
-        customer_city_head = customer_city.head(5)
-
-        # mencari 5 kota dengan jumlah seller paling sedikit
-        customer_city_tail = customer_city.tail(5)
-
-        # Mencari jumlah seller di berbagai kota
-        seller_city = data_sellers['seller_city'].value_counts()
-
-        # Mancari Jumlah Seller paling banyak
-        seller_city_head = seller_city.head(5)
-
-        # Mencari 5 kota dengan penjual paling sedikit
-        seller_city_tail = seller_city.tail(5)
-
-        st.caption("**10122480 - Paska Damarkus Sinaga**")
-        st.subheader("Informasi Analisis")
-        st.markdown("**Analisis Terhadap 10 Kota Dengan Seller & Customer Paling Banyak**")
-        with st.expander("Tujuan Analisis Infomasi Tersebut"):
+    st.caption("**10122480 - Paska Damarkus Sinaga**")
+    st.subheader("Informasi Analisis")
+    st.markdown("**Analisis Terhadap 10 Kota Dengan Seller & Customer Paling Banyak**")
+    with st.expander("Tujuan Analisis Infomasi Tersebut"):
             st.write("Dengan mengetahui kota mana yang memiliki jumlah pelanggan dan penjual terbanyak, Anda dapat mengalokasikan sumber daya dan upaya pemasaran Anda dengan lebih efisien. Misalnya, jika suatu kota memiliki jumlah penjual yang tinggi tetapi pelanggan yang rendah, Anda mungkin ingin meningkatkan upaya pemasaran Anda di kota tersebut.")
             st.write("Analisis ini dapat membantu Anda memahami dinamika pasar Anda dengan lebih baik. Anda dapat mengetahui di mana penjual dan pelanggan Anda berada, dan bagaimana mereka berinteraksi satu sama lain.")
 
-        st.markdown("---")
-        st.subheader("Grafik 10 Kota Dengan Seller Paling Banyak")
+    # Mencari jumlah seller di berbagai kota
+    city = data_sellers['seller_city'].value_counts()
+    
+    # Mancari Jumlah Seller paling banyak
+    city_head = city.head(10)
+
+    # Mencari 10 kota dengan penjual paling sedikit
+    city_tail = city.tail(10)
 
         # Warna untuk diagram kotak
-        colors = plt.cm.Paired(np.arange(len(seller_city_head)))
-
-        # Plot seller
-        plt.bar(seller_city_head.index, seller_city_head.values, color=colors)
-        plt.xticks(seller_city_head.index, rotation=90)
-        plt.title('10 Kota dengan Penjual Terbanyak')
+    colors = plt.cm.Paired(np.arange(len(city_head)))
 
         
-
-        st.markdown("---")
-        st.subheader("Diagram Lingkaran Jumlah Seller di Kota-Kota Teratas")
+    st.markdown("---")
+    st.subheader("Diagram Lingkaran Jumlah Seller di Kota-Kota Teratas")
 
         # Ambil data untuk diagram lingkaran
-        top_seller_cities = seller_city_head.index
-        top_seller_counts = seller_city_head.values
+    top_seller_cities = city_head.index
+    top_seller_counts = city_head.values
 
         # Buat diagram lingkaran
-        plt.figure(figsize=(8, 8))
-        plt.pie(top_seller_counts, labels=top_seller_cities, autopct='%1.1f%%', startangle=140, colors=colors)
-        plt.title('Persentase Jumlah Seller di Kota-Kota Teratas')
-        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    fig = go.Figure(data=[go.Pie(labels=top_seller_cities, values=top_seller_counts, textinfo='percent', 
+                             marker_colors=colors, hole=.3)])
+    fig.update_layout(title='Persentase Jumlah Seller di Kota-Kota Teratas')
 
-        # Tampilkan diagram lingkaran
-        st.pyplot(plt)
+    # Tampilkan diagram lingkaran
+    st.plotly_chart(fig)
 
-        st.markdown("---")
-        st.subheader("Analisis Tambahan")
+    st.markdown("---")
+    st.subheader("Analisis Tambahan")
 
-        st.write("Dari analisis yang dilakukan, kita dapat melihat bahwa Sao Paulo menjadi kota dengan jumlah penjual dan pelanggan terbanyak. Hal ini menunjukkan bahwa Sao Paulo memiliki potensi pasar yang besar dan aktif dalam industri e-commerce. Strategi pemasaran yang difokuskan di kota ini dapat memberikan hasil yang signifikan.")
-        st.write("Selain itu, terdapat korelasi positif antara jumlah penjual dan pelanggan di tiap kota, yang menunjukkan bahwa semakin banyak penjual, kemungkinan besar akan ada juga lebih banyak pelanggan. Oleh karena itu, mengembangkan jaringan penjual dapat menjadi strategi yang efektif untuk meningkatkan pangsa pasar.")
-        st.write("Untuk mengoptimalkan strategi pemasaran, perlu dilakukan analisis lebih lanjut mengenai preferensi pelanggan dan kebutuhan pasar di tiap kota. Dengan pemahaman yang lebih mendalam tentang karakteristik pasar lokal, Anda dapat mengarahkan upaya pemasaran Anda dengan lebih tepat dan efisien.")
-
-    analisis_paska(data_customer,data_sellers)
+    st.write("Dari analisis yang dilakukan, kita dapat melihat bahwa Sao Paulo menjadi kota dengan jumlah penjual dan pelanggan terbanyak. Hal ini menunjukkan bahwa Sao Paulo memiliki potensi pasar yang besar dan aktif dalam industri e-commerce. Strategi pemasaran yang difokuskan di kota ini dapat memberikan hasil yang signifikan.")
+    st.write("Selain itu, terdapat korelasi positif antara jumlah penjual dan pelanggan di tiap kota, yang menunjukkan bahwa semakin banyak penjual, kemungkinan besar akan ada juga lebih banyak pelanggan. Oleh karena itu, mengembangkan jaringan penjual dapat menjadi strategi yang efektif untuk meningkatkan pangsa pasar.")
+    st.write("Untuk mengoptimalkan strategi pemasaran, perlu dilakukan analisis lebih lanjut mengenai preferensi pelanggan dan kebutuhan pasar di tiap kota. Dengan pemahaman yang lebih mendalam tentang karakteristik pasar lokal, Anda dapat mengarahkan upaya pemasaran Anda dengan lebih tepat dan efisien.")
 
 
     
@@ -458,55 +435,39 @@ with tab3:
 
     analisis_farras(data_customer,data_sellers)
 
-    def analisisRyan(data_customer,data_produk,data_order,data_order_item):
+     #Ryan
 
-        # Mencari jumlah product
-        product_category_name = data_produk['product_category_name'].value_counts()
+    #Mencari jumlah customer di berbagai provinsi
+    customer_state = data_customer['customer_state'].value_counts()
 
-        # Mengurutkan dan mencari 10 kategori produk yang paling banyak dipesan
-        product_category_name_head = product_category_name.head(10)
+    # Mengurutkan dan mencari 10 kota teratas dengan customer terbanyak
+    customer_state_head = customer_state.head(10)
 
-        # Mencari jumlah customer di berbagai kota
-        customer_city = data_customer['customer_city'].value_counts()
+    st.caption("**10122479 - Ryan Akbar Ramadhan**")
+    st.subheader("Informasi Analisis")
+    st.markdown("**Analisis Terhadap Jumlah Pelanggan dari berbagai provinsi**")
+    with st.expander("Tujuan Analisis Infomasi Tersebut"):
+        st.write("Akan dapat diketahui berapa banyak pelanggan dari berbagai provinsi, kita dapat menggunakan informasi ini untuk mengupayakan agar meningkatkan pemasaran di provinsi yang jumlah pelanggannya sedikit")
 
-        # Mengurutkan dan mencari 5 kota teratas dengan customer terbanyak
-        customer_city_head = customer_city.head(5)
+    #===========================================================================
+    st.markdown("---")
+    st.subheader("Grafik Jumlah Pelanggan dari berbagai provinsi")
 
-        # mencari 5 kota dengan jumlah seller paling sedikit
-        customer_city_tail = customer_city.tail(5)
+    # Plot customer
+    warnaBar = ['#00563B','darkgreen','green','#02a633','lightgreen']
+    plt.title('10 Provinsi Beserta Pelanggannya')
+    plt.bar(customer_state_head.index, customer_state_head.values, color=warnaBar)
+    plt.xticks(customer_state_head.index, rotation=0)
 
-        # Mencari jumlah seller di berbagai kota
-        seller_city = data_sellers['seller_city'].value_counts()
+    st.write("**Provinsi Beserta Jumlah Pelanggannya**")
+    st.dataframe(customer_state)
 
-        # Mancari Jumlah Seller paling banyak
-        seller_city_head = seller_city.head(5)
+    # Menampilkan Visualisasi
+    st.pyplot(plt)
 
-        # Mencari 5 kota dengan penjual paling sedikit
-        seller_city_tail = seller_city.tail(5)
-
-        #==========================================================================
-
-        st.caption("**10122479 - Ryan Akbar Ramadhan**")
-        st.markdown("**Analisis Terhadap 10 Kategori Produk Yang Paling Banyak dipesan**")
-        with st.expander("Tujuan Analisis Infomasi Tersebut"):
-            st.write("Dengan mengetahui kategori produk yang paling banyak dipesan, Anda dapat mengalokasikan sumber daya anda agar lebih efisien untuk kategori produk yang paling banyak.")
-            st.write("Analisis ini dapat membantu Anda memahami dinamika pasar Anda dengan lebih baik.")
-
-        #===========================================================================
-        st.markdown("---")
-        st.subheader("Grafik 10 Kategori Produk Dengan Order Paling Banyak")
-
-        warna = ['green','lightgreen','lightgreen','lightgreen','yellow']
-
-        # Plot seller
-        plt.bar(product_category_name_head.index, product_category_name_head.values, color=warna)
-        plt.xticks(product_category_name_head.index, rotation=90)
-        plt.title('10 Kategori Produk Yang Paling Banyak')
-
-        # Menampilkan Visualisasi
-        st.pyplot(plt)
-
-    analisisRyan(data_customer,data_produk,data_order,data_order_item)
+    with st.expander("Penjelasan Mengenai Visualisasi"):
+        st.write("Dapat dilihat pada grafik bahwa, Provinsi SP merupakan Provinsi yang memiliki jumlah pelanggan paling banyak, yaitu sebanyak 41.746 Pelanggan.")
+        st.write("Jumlah Pelanggan tersebut hampir 4 kali lipat dari jumlah pelanggan yang ada di Provinsi RJ dan MG, Perbedaan yang sangat tinggi dibandingkan jumlah pelanggan di provinsi lainnya.")
 
     
 
